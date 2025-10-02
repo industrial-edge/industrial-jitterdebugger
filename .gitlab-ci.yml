@@ -1,0 +1,103 @@
+variables:
+  http_proxy: "${CODE_PROXY}"
+  https_proxy: "${CODE_PROXY}"
+  no_proxy: "${CODE_NO_PROXY}"
+
+stages:
+  - check
+  - python
+  - docker
+  - edgeapp
+
+version:
+  image: python:3.11
+  stage: check
+  script:
+    - python3 -m venv venv
+    - . venv/bin/activate
+    - make dev
+    - make version > build.env
+    - cat build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+#flake8:
+#  image: python:3.11
+#  stage: check
+#  script:
+#    - python3 -m venv venv
+#    - . venv/bin/activate
+#    - pip install flake8
+#    - make lint
+
+python_wheel:
+  stage: python
+  image: python:3.11
+  script:
+    - python3 -m venv venv
+    - . venv/bin/activate
+    - make dev wheel
+    - ls -l dist
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+docker_container:
+  stage: docker
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: ['']
+  script:
+    - |
+      if [ "${CI_COMMIT_BRANCH}" = "main" ]; then
+        LATEST="latest"
+      else
+        LATEST="$(echo ${CI_COMMIT_BRANCH} | tr '/' '-')"
+        TAG="${TAG}-${CI_COMMIT_SHORT_SHA}"
+      fi
+      cat - > /kaniko/.docker/config.json <<EOT
+      {
+        "auths": {
+          "${CI_REGISTRY}": {
+            "username": "${CI_REGISTRY_USER}",
+            "password": "${CI_REGISTRY_PASSWORD}"
+          }
+        },
+        "proxies": {
+          "default": {
+            "httpProxy": "${http_proxy}",
+            "httpsProxy": "${https_proxy}",
+            "noProxy": "${no_proxy}"
+          }
+        }
+      }
+      EOT
+    - /kaniko/executor
+        --context ${CI_PROJECT_DIR}
+        --dockerfile docker/Dockerfile
+        --destination $CI_REGISTRY_IMAGE/industrial-jitterdebugger:${TAG}
+        --destination $CI_REGISTRY_IMAGE/industrial-jitterdebugger:${LATEST}
+        --build-arg VERSION=$VERSION
+        --build-arg http_proxy
+        --build-arg https_proxy
+        --build-arg no_proxy
+
+edge_app:
+  stage: edgeapp
+  image:
+    name: golang:1.23-bookworm
+  script:
+    - |
+      apt-get update && apt-get install -y docker.io
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+      export REGISTRY=${CI_REGISTRY}/${CI_PROJECT_PATH}/
+      if [ "${CI_COMMIT_BRANCH}" != "main" ]; then
+        TAG="${TAG}-${CI_COMMIT_SHORT_SHA}"
+      fi
+    - go run github.com/thediveo/tiap/cmd/tiap@latest -i -o industrial-jitterdebugger_${TAG}.app --app-version ${TAG} app
+  artifacts:
+    paths:
+      - industrial-jitterdebugger_${TAG}*.app
+    expire_in: 1 week

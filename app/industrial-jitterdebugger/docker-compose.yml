@@ -2,10 +2,9 @@
 # This file is subject to the terms and conditions of the MIT License.
 # See LICENSE file in the top-level directory.
 
-version: '2.4'
 services:
-  cpu-jitter:
-    build: docker
+  jitter:
+    image: ${REGISTRY}industrial-jitterdebugger:${TAG}
     command: ["python3", "-m", "industrial_jitterdebugger.jitter"]
     cap_add:
       - SYS_NICE
@@ -16,37 +15,39 @@ services:
         siemens.com/isolated_core: 1
     mem_limit: 1gb
     networks:
-      - proxy-redirect
+      - industrial-jitterdebugger-net
     volumes:
       - ./publish/:/publish/
       - ./cfg-data/:/cfg-data/
 
-  cpu-stress:
-    build: docker
+  stress:
+    image: ${REGISTRY}industrial-jitterdebugger:${TAG}
     command: ["python3", "-m", "industrial_jitterdebugger.stress"]
     runtime: iedge
     mem_limit: 2gb
     networks:
-      - proxy-redirect
+      - industrial-jitterdebugger-net
     volumes:
       - ./publish/:/publish/
       - ./cfg-data/:/cfg-data/
   
-  webui:
-    build: docker
+  industrial-jitterdebugger-webui:
+    image: ${REGISTRY}industrial-jitterdebugger:${TAG}
     command: ["streamlit", "run", "/usr/bin/launch_webui.py", "--server.address=0.0.0.0", "--client.toolbarMode=minimal", "--theme.base=dark", "--theme.backgroundColor=#000028", "--theme.primaryColor=#029402"]
     mem_limit: 200mb
     networks:
       - proxy-redirect
+      - industrial-jitterdebugger-net
     depends_on:
-      - cpu-jitter
-      - cpu-stress
+      - jitter
+      - stress
     volumes:
       - ./publish/:/publish/
       - ./cfg-data/:/cfg-data/
 
 networks:
+  industrial-jitterdebugger-net:
   proxy-redirect:
-    external:
-      name: proxy-redirect
+    name: proxy-redirect
+    external: true
     driver: bridge

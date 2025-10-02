@@ -1,0 +1,19 @@
+{
+    "versionNumber": "",
+    "versionId": "",
+    "title": "Industrial Jitterdebugger",
+    "appId": "2bcDrGaW4GE26ftYfxa34ySckTg5Bqy4",
+    "restRedirectUrl": "",
+    "redirectSection": "industrial-jitterdebugger-webui",
+    "redirectUrl": "industrial-jitterdebugger/",
+    "redirectType": "FromBoxReverseProxy",
+    "description": "Industrial Jitterdebugger",
+    "swarmModeEnable": false,
+    "required": [],
+    "releaseNotes": "",
+    "signUpType": "None",
+    "externalConfigurator": false,
+    "externalUrl": "",
+    "webAddress":"http://code.siemens.com/",
+    "isAppSecure": false
+}
