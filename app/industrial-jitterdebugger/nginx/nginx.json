@@ -1,0 +1,11 @@
+{
+  "industrial-jitterdebugger-webui": [
+    {
+      "name": "industrial-jitterdebugger",
+      "protocol": "HTTP",
+      "port": "8501",
+      "headers": "",
+      "rewritetarget": "/",
+    }
+  ]
+}

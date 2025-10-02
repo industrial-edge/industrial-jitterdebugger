@@ -71,8 +71,8 @@ def do_test(duration):
     if isfile('/publish/stress-results.txt'):
         os.remove('/publish/stress-results.txt')
     data = {"duration": duration}
-    requests.post('http://cpu-jitter:5000/runjitter', json=data, timeout=3)
-    requests.post('http://cpu-stress:5000/runstress', json=data, timeout=3)
+    requests.post('http://jitter:5000/runjitter', json=data, timeout=3)
+    requests.post('http://stress:5000/runstress', json=data, timeout=3)
 
 def read_json_file(path):
     with open(path, 'r', encoding="utf-8") as file:
@@ -90,10 +90,10 @@ def click_start():
     st.session_state.disabled = not st.session_state.disabled
 
 def is_test_running():
-    return not bool(int(requests.get('http://cpu-jitter:5000/checkstatus', timeout=3).text))
+    return not bool(int(requests.get('http://jitter:5000/checkstatus', timeout=3).text))
 
 def get_test_total_time():
-    result = requests.get('http://cpu-jitter:5000/totaltime', timeout=3).text
+    result = requests.get('http://jitter:5000/totaltime', timeout=3).text
     result = result.split(' ')[2]
     tnumber = int(result[:-1])
     tunit = result[-1]
@@ -106,7 +106,7 @@ def get_test_total_time():
     return tnumber, tunit
 
 def get_test_running_time():
-    result = int(requests.get('http://cpu-jitter:5000/runningtime', timeout=3).text)
+    result = int(requests.get('http://jitter:5000/runningtime', timeout=3).text)
     return result
 
 def show_test_results():
@@ -127,7 +127,7 @@ def show_test_results():
 
 def main():
     st.set_page_config(
-        page_title="CPU Real-Time Tests",
+        page_title="Industrial Jitterdebugger",
         page_icon=asset_path("favicon.ico"),
         menu_items=None,
         layout="wide"
@@ -137,7 +137,7 @@ def main():
 
     with center:
         st.image(asset_path("sie-logo-white-rgb.png"), width=150)
-        st.title('CPU Real-Time Tests')
+        st.title('Industrial Jitterdebugger')
         st.write('This Industrial Edge app can be used for validating a device\'s real-time behavior. It runs two programs simultaneously:')
         st.write('- The first program measures wake-up latencies using `jitterdebugger` (https://github.com/igaw/jitterdebugger). For that purpose, it measures the time it takes to wake-up a thread by an expiring timer.')
         st.write('- The second program puts load on the available CPUs using `stress-ng` (https://github.com/ColinIanKing/stress-ng). Sepcifically, it runs `stress-ng --cpu "$(nproc)" --io 2 --vm 2 --vm-bytes 128M --fork 4 --metrics` and prints the measurements.')

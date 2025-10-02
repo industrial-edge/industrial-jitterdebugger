@@ -12,10 +12,11 @@ RUN git clone https://github.com/igaw/jitterdebugger.git /work/jitterdebugger &&
 
 FROM alpine:3.22
 ARG VERSION
-RUN apk add --no-cache python3 py3-pip procps stress-ng
+RUN apk add --no-cache python3 uv procps stress-ng
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
 
 COPY --from=builder /work/jitterdebugger/jitterdebugger /work/jitterdebugger/jittersamples /work/jitterdebugger/jitterplot /usr/bin/
-COPY dist/industrial_jitterdebugger-${VERSION}*.whl ./
+COPY industrial_jitterdebugger-${VERSION}*.whl ./
 
-RUN PYTHONDONTWRITEBYTECODE=1 pip3 install --no-cache-dir --no-compile --root-user-action=ignore --break-system-packages /industrial_jitterdebugger-${VERSION}*.whl && \
+RUN PYTHONDONTWRITEBYTECODE=1 uv pip install --no-cache --system --break-system-packages /industrial_jitterdebugger-${VERSION}*.whl && \
     rm /industrial_jitterdebugger-${VERSION}*.whl
