@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools >= 66.0", "versioningit ~= 3.2.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "industrial_jitterdebugger"
+dynamic = ["version"]
+description = "industrial jitterdebugger"
+requires-python = ">= 3.11"
+dependencies = [
+    "flask ~= 3.0",
+    "matplotlib ~= 3.10",
+    "numpy ~= 2.3",
+    "pyyaml ~= 6.0",
+    "requests ~= 2.32",
+    "streamlit ~= 1.48",
+]
+
+[project.scripts]
+"launch_webui.py" = "industrial_jitterdebugger.webui:main"
+
+[tool.setuptools.packages.find]
+include = ["industrial_jitterdebugger**"]
+
+[tool.setuptools.package-data]
+industrial_jitterdebugger = ["assets/**"]
+
+[tool.versioningit.format]
+distance = "{base_version}.dev{distance}+{vcs}{rev}"
+dirty = "{base_version}+dirty"
+distance-dirty = "{base_version}.dev{distance}+{vcs}{rev}.dirty"
