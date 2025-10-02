@@ -5,7 +5,8 @@
 version: '2.4'
 services:
   cpu-jitter:
-    build: src/jitter
+    build: docker
+    command: ["python3", "-m", "industrial_jitterdebugger.jitter"]
     cap_add:
       - SYS_NICE
       - IPC_LOCK
@@ -21,7 +22,8 @@ services:
       - ./cfg-data/:/cfg-data/
 
   cpu-stress:
-    build: src/stress
+    build: docker
+    command: ["python3", "-m", "industrial_jitterdebugger.stress"]
     runtime: iedge
     mem_limit: 2gb
     networks:
@@ -31,7 +33,8 @@ services:
       - ./cfg-data/:/cfg-data/
   
   webui:
-    build: src/webui
+    build: docker
+    command: ["streamlit", "run", "/usr/bin/launch_webui.py", "--server.address=0.0.0.0", "--client.toolbarMode=minimal", "--theme.base=dark", "--theme.backgroundColor=#000028", "--theme.primaryColor=#029402"]
     mem_limit: 200mb
     networks:
       - proxy-redirect
