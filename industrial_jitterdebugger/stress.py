@@ -18,5 +18,11 @@ def runstress():
     return "success"
 
 
+@app.route("/killstress", methods=["POST"])
+def killstress():
+    status, _ = subprocess.getstatusoutput("pkill stress-ng")
+    return str(status)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
