@@ -22,14 +22,14 @@ version:
     reports:
       dotenv: build.env
 
-#flake8:
-#  image: python:3.11
-#  stage: check
-#  script:
-#    - python3 -m venv venv
-#    - . venv/bin/activate
-#    - pip install flake8
-#    - make lint
+flake8:
+  image: python:3.11
+  stage: check
+  script:
+    - python3 -m venv venv
+    - . venv/bin/activate
+    - pip install flake8
+    - make lint
 
 python_wheel:
   stage: python
