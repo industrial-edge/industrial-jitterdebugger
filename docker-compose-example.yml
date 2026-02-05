@@ -1,0 +1,49 @@
+# Copyright (c) 2024 Siemens AG
+# This file is subject to the terms and conditions of the MIT License.
+# See LICENSE file in the top-level directory.
+
+version: '2.4'
+services:
+  cpu-jitter:
+    build: src/jitter
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    runtime: iedge
+    x-resources:
+      limits:
+        siemens.com/isolated_core: 1
+    mem_limit: 1gb
+    networks:
+      - proxy-redirect
+    volumes:
+      - ./publish/:/publish/
+      - ./cfg-data/:/cfg-data/
+
+  cpu-stress:
+    build: src/stress
+    runtime: iedge
+    mem_limit: 2gb
+    networks:
+      - proxy-redirect
+    volumes:
+      - ./publish/:/publish/
+      - ./cfg-data/:/cfg-data/
+  
+  webui:
+    build: src/webui
+    mem_limit: 200mb
+    networks:
+      - proxy-redirect
+    depends_on:
+      - cpu-jitter
+      - cpu-stress
+    volumes:
+      - ./publish/:/publish/
+      - ./cfg-data/:/cfg-data/
+
+networks:
+  proxy-redirect:
+    external:
+      name: proxy-redirect
+    driver: bridge
