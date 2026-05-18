@@ -33,7 +33,7 @@ services:
   
   industrial-jitterdebugger-webui:
     image: ${REGISTRY}industrial-jitterdebugger:${TAG}
-    command: ["streamlit", "run", "/usr/bin/launch_webui.py", "--server.address=0.0.0.0", "--client.toolbarMode=minimal", "--theme.base=dark", "--theme.backgroundColor=#000028", "--theme.primaryColor=#029402"]
+    command: ["streamlit", "run", "/usr/bin/launch_webui.py", "--server.address=0.0.0.0", "--client.toolbarMode=minimal", "--theme.base=dark", "--theme.backgroundColor=#000028", "--theme.primaryColor=#029402", "--server.fileWatcherType=none", "--browser.gatherUsageStats=false"]
     mem_limit: 200mb
     networks:
       - proxy-redirect
