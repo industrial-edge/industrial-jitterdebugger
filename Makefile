@@ -25,9 +25,10 @@ lint:
 	flake8 $(PYTHON_TARGET)
 
 .PHONY: update
-update: venv
+update:
+	uv sync --no-dev
 	uv pip install --upgrade -r pyproject.toml
-	uv pip freeze --exclude-editable > requirements.txt
+	uv pip freeze --exclude-editable --exclude pip --exclude uv --exclude build --exclude versioningit > requirements.txt
 
 .PHONY: wheel
 wheel: venv
